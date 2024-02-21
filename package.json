@@ -1,0 +1,14 @@
+{
+  "name": "gear-maker",
+  "version": "1.0.0",
+  "description": "An online tool to generate high quality 3D models of several different gear types.",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "Connor Mooney",
+  "license": "MIT",
+  "dependencies": {
+    "express": "^4.18.2"
+  }
+}
