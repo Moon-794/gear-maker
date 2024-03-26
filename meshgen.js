@@ -35,7 +35,7 @@ function GenerateCircle(divisions)
     //Order of operations:
     //Loop through a number of circular segments, each will draw 2 tooth halves
     var module = 0.5;
-    var numTeeth = 8;
+    var numTeeth = 32;
     var topWidth = 0.2;
     var pitchCircleRadius = (module * numTeeth) / 2;
     var addendum = pitchCircleRadius + module;
@@ -43,73 +43,89 @@ function GenerateCircle(divisions)
     var toothSegAngle = (2 * 3.14159) / numTeeth;
     var singleToothAngle = toothSegAngle / 3;
 
-    //First bit of top land
-    var x = Math.sin(0) * addendum;
-    var y = Math.cos(0) * addendum;
-    var z = 0;
-    AddVertexPosition(vertices, x, y, z);
-
-    //Second bit
-    //Slope of current tangent line of the root radius
-    var m = -x/y;
-
-    var x2 = x + topWidth/Math.sqrt(1+Math.pow(m, 2));
-    var y2 = y + m * (topWidth/Math.sqrt(1+Math.pow(m, 2)));
-    var z2 = 0;
-
-    AddVertexPosition(vertices, x2, y2, z2);
-
-    indices.push(0);
-    indices.push(1);
-    indices.push(2);
-
-    var x3 = Math.sin(singleToothAngle) * pitchCircleRadius;
-    var y3 = Math.cos(singleToothAngle) * pitchCircleRadius;
-    var z3 = 0;
-
-    AddVertexPosition(vertices, x3, y3, z3);
-
-    indices.push(0);
-    indices.push(2);
-    indices.push(3);
-
-    var base = 3;
-    for (let q = 0; q < 3; q++) 
+    for (let g = 0; g < numTeeth; g++) 
     {
-        var phi = singleToothAngle / 3;
-        var x = Math.sin(singleToothAngle + ((q + 1) * phi)) * pitchCircleRadius;
-        var y = Math.cos(singleToothAngle + ((q + 1) * phi)) * pitchCircleRadius;
+        //First bit of top land
+        var start = toothSegAngle * g;
+        //Create initial midpoint
+        var x = Math.sin(start) * addendum;
+        var y = Math.cos(start) * addendum;
         var z = 0;
-        
         AddVertexPosition(vertices, x, y, z);
-        
-        var i = (indices.length / 3) + 1;
+
+        //Second bit
+        //Slope of current tangent line of the root radius
+        var m = -x/y;
+        var sign = 1;
+        if(y < 0)
+        {
+            sign = -1;
+        }
+
+        var x2 = x + sign * topWidth/Math.sqrt(1+Math.pow(m, 2));
+        var y2 = y + sign * m * (topWidth/Math.sqrt(1+Math.pow(m, 2)));
+        var z2 = 0;
+
+        AddVertexPosition(vertices, x2, y2, z2);
+        var i = (vertices.length / 3) - 1;
         indices.push(0);
+        indices.push(i - 1);
         indices.push(i);
-        indices.push(i + 1);
+
+        var x3 = Math.sin(start + singleToothAngle) * pitchCircleRadius;
+        var y3 = Math.cos(start + singleToothAngle) * pitchCircleRadius;
+        var z3 = 0;
+
+        AddVertexPosition(vertices, x3, y3, z3);
+        var i = (vertices.length / 3) - 1;
+        indices.push(0);
+        indices.push(i - 1);
+        indices.push(i);
+
+        var base = 3;
+        for (let q = 0; q < 3; q++) 
+        {
+            var phi = singleToothAngle / 3;
+            var x = Math.sin(start + singleToothAngle + ((q + 1) * phi)) * pitchCircleRadius;
+            var y = Math.cos(start + singleToothAngle + ((q + 1) * phi)) * pitchCircleRadius;
+            var z = 0;
+            
+            AddVertexPosition(vertices, x, y, z);
+            
+            var i = (vertices.length / 3) - 1;
+            indices.push(0);
+            indices.push(i - 1);
+            indices.push(i);
+        }
+
+        var x4 = Math.sin(start + toothSegAngle) * addendum;
+        var y4 = Math.cos(start + toothSegAngle) * addendum;
+        var z4 = 0;
+
+        var mFT = -x4/y4;
+        var sign = 1;
+        if(y4 < 0)
+        {
+            sign = -1;
+        }
+
+        var x5 = x4 - sign * topWidth/Math.sqrt(1+Math.pow(mFT, 2));
+        var y5 = y4 - sign * mFT * (topWidth/Math.sqrt(1+Math.pow(mFT, 2)));
+        var z5 = 0; 
+        
+        AddVertexPosition(vertices, x5, y5, z5);
+        var i = (vertices.length / 3) - 1;
+        indices.push(0);
+        indices.push(i - 1);
+        indices.push(i);
+
+        AddVertexPosition(vertices, x4, y4, z4);
+        var i = (vertices.length / 3) - 1;
+        indices.push(0);
+        indices.push(i - 1);
+        indices.push(i);
     }
-
-    var x4 = Math.sin(toothSegAngle) * addendum;
-    var y4 = Math.cos(toothSegAngle) * addendum;
-    var z4 = 0;
-
-    var mFT = -x4/y4;
-
-    var x5 = x4 - topWidth/Math.sqrt(1+Math.pow(mFT, 2));
-    var y5 = y4 - mFT * (topWidth/Math.sqrt(1+Math.pow(mFT, 2)));
-    var z5 = 0; 
-
-    AddVertexPosition(vertices, x5, y5, z5);
-    var i = (indices.length / 3) + 1;
-    indices.push(0);
-    indices.push(i);
-    indices.push(i + 1);
-
-    AddVertexPosition(vertices, x4, y4, z4);
-    var i = (indices.length / 3) + 1;
-    indices.push(0);
-    indices.push(i);
-    indices.push(i + 1);
+    
 
     /*
     for (let toothNo = 0; toothNo < numTeeth; toothNo++) 
