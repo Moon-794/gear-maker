@@ -2,6 +2,7 @@ import * as THREE from 'three'
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
 import $ from 'jquery'
 
+
 //To generate a spur, we need the following:
 // 1 > Module
 // 2 > Number of teeth
@@ -18,6 +19,22 @@ function AddVertexPosition(array, x, y, z)
     array.push(z);
 
     console.log("Made a vertex at: " + x + " " + y + " " + z);
+}
+
+function GetVertexFromIndex(index, vertices)
+{
+    var x1 = vertices[index * 3];
+    var y1 = vertices[(index * 3) + 1];
+    var z1 = 0;
+
+    var obj = 
+    {
+        x: x1,
+        y: y1,
+        z: z1
+    };
+
+    return obj;
 }
 
 function GenerateCircle(divisions)
@@ -67,10 +84,10 @@ function GenerateCircle(divisions)
         var z2 = 0;
 
         AddVertexPosition(vertices, x2, y2, z2);
-        var i = (vertices.length / 3) - 1;
+        var i1 = (vertices.length / 3) - 1;
         indices.push(0);
-        indices.push(i - 1);
-        indices.push(i);
+        indices.push(i1 - 1);
+        indices.push(i1);
 
         var x3 = Math.sin(start + singleToothAngle) * pitchCircleRadius;
         var y3 = Math.cos(start + singleToothAngle) * pitchCircleRadius;
@@ -125,7 +142,25 @@ function GenerateCircle(divisions)
         indices.push(i - 1);
         indices.push(i);
     }
-    
+
+    var extrudeCounter = vertices.length / 3;
+    for(var p = 1; p < extrudeCounter; p ++)
+    {
+        //Create the other side to add thickness
+        var vert = GetVertexFromIndex(p, vertices)
+        AddVertexPosition(vertices, vert.x, vert.y, 2);
+        var vert2 = GetVertexFromIndex(p + 1, vertices)
+        AddVertexPosition(vertices, vert2.x, vert2.y, 2);
+
+        var i = (vertices.length / 3) - 1;
+        indices.push(p);
+        indices.push(i - 1);
+        indices.push(i);
+
+        indices.push(p);
+        indices.push(i);
+        indices.push(p + 1);
+    }
 
     /*
     for (let toothNo = 0; toothNo < numTeeth; toothNo++) 
@@ -167,13 +202,13 @@ function GenerateCircle(divisions)
 	const mesh = new THREE.Mesh(geometry, material);
 
     const wireframe = new THREE.WireframeGeometry(geometry);
-
+    
     const line = new THREE.LineSegments(wireframe);
     line.material.depthTest = false;
     line.material.opacity = 0.25;
     line.material.transparent = true;
     line.material.color = 0xff0000;
-
+    
     return {mesh, line};
 }
 
